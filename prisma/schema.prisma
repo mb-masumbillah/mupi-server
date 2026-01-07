@@ -10,7 +10,8 @@ datasource db {
 model User {
   id                  String     @id @default(uuid())
   fullName            String
-  roll                String     @unique
+  roll                String?    @unique
+  instructorId        String?    @unique
   password            String
   email               String     @unique
   image               String     @default("")
@@ -22,9 +23,10 @@ model User {
   lastLogin           DateTime   @default(now())
   otpToken            String?
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  students  Student[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  students    Student[]
+  instructors Instructor[]
 
   @@map("users")
 }
@@ -49,6 +51,50 @@ model Student {
   updatedAt DateTime @updatedAt
 
   @@map("students")
+}
+
+model Instructor {
+  id           String  @id @default(uuid())
+  fullName     String
+  user         String
+  users        User    @relation(fields: [user], references: [email])
+  instructorId String  @unique
+  email        String  @unique
+  number       String
+  image        String  @default("")
+  isDeleted    Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("instructors")
+}
+
+// payment
+model Payment {
+  id        String   @id @default(uuid())
+  roll      String   @unique
+  amount    String
+  txnId     String
+  number    String
+  semester  String
+  image     String?
+  status    String   @default("pending")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  repeats   Repeat[]
+
+  @@map("payments")
+}
+
+model Repeat {
+  id        String   @id @default(uuid())
+  semester  String?
+  subject   String[]
+  payment   Payment  @relation(fields: [paymentId], references: [id])
+  paymentId String
+
+  @@map("repeats")
 }
 
 enum Department {

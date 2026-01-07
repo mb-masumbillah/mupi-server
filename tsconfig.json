@@ -1,5 +1,5 @@
 {
-  "include": ["src"],
+  "include": ["src", "src/app/DB/seed.ts"],
   "exclude": ["node_modules"],
 
   "compilerOptions": {

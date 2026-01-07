@@ -14,4 +14,24 @@ router.post(
   userContorller.createStudent
 );
 
+router.post(
+  "/create-instructor",
+  upload.single("file"),
+  (req: Request, res: Response, next: NextFunction) => {
+    req.body = JSON.parse(req.body.data);
+    next();
+  },
+  userContorller.createInstructor
+);
+
+router.post(
+  "/create-temporaryAdmin",
+  upload.single("file"),
+  (req: Request, res: Response, next: NextFunction) => {
+    req.body = JSON.parse(req.body.data);
+    next();
+  },
+  userContorller.createTemporaryAdmin
+);
+
 export const userRouter = router;

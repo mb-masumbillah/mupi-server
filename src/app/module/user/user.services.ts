@@ -3,14 +3,14 @@ import AppError from "../../error/appError";
 import { StatusCodes } from "http-status-codes";
 import config from "../../config";
 import { prisma } from "../../shared/prisma";
-import { Student, UserRole } from "../../../../generated/prisma/client";
+import {
+  Instructor,
+  Student,
+  UserRole,
+} from "../../../../generated/prisma/client";
 import { uploadToCloudinary } from "../../shared/sendImageToCloudinary";
 
-const createStudent = async (
-    file: any,
-  password: string,
-  payload: Student
-) => {
+const createStudent = async (file: any, password: string, payload: Student) => {
   // Check if user exists
   const isUser = await prisma.user.findUnique({
     where: { email: payload?.email },
@@ -24,13 +24,13 @@ const createStudent = async (
   }
 
   // Cloudinary upload
-    if (file) {
-      const { secure_url }: any = await uploadToCloudinary(
-        `${payload.email}-${payload.fullName}`,
-        file.buffer
-      );
-      payload.image = secure_url;
-    }
+  if (file) {
+    const { secure_url }: any = await uploadToCloudinary(
+      `${payload.email}-${payload.fullName}`,
+      file.buffer
+    );
+    payload.image = secure_url;
+  }
 
   // Hash the password
   const hashedPassword = await bcrypt.hash(
@@ -39,7 +39,7 @@ const createStudent = async (
   );
 
   // Prisma transaction+
-  const [newUser, newStudent] = await prisma.$transaction(async (tx) => {
+  const newStudent = await prisma.$transaction(async (tx) => {
     // create user
     const createdUser = await tx.user.create({
       data: {
@@ -58,7 +58,7 @@ const createStudent = async (
       data: {
         fullName: payload.fullName,
         user: createdUser.email,
-        roll: createdUser.roll,
+        roll: createdUser.roll!,
         registration: payload.registration,
         department: payload.department,
         session: payload.session,
@@ -71,10 +71,10 @@ const createStudent = async (
       },
     });
 
-    return [createdUser, createdStudent];
+    return createdStudent;
   });
 
-  if (!newUser || !newStudent) {
+  if (!newStudent) {
     throw new AppError(
       StatusCodes.BAD_REQUEST,
       "Failed to create user or student"
@@ -84,6 +84,133 @@ const createStudent = async (
   return newStudent;
 };
 
+const createInstructor = async (
+  file: any,
+  password: string,
+  payload: Instructor
+) => {
+  // Check if user exists
+  const isUser = await prisma.user.findUnique({
+    where: { email: payload?.email },
+  });
+
+  if (isUser) {
+    throw new AppError(
+      400,
+      "Instructor already exists. Please create a new Instructor!"
+    );
+  }
+
+  // Cloudinary upload
+  if (file) {
+    const { secure_url }: any = await uploadToCloudinary(
+      `${payload.email}-${payload.fullName}`,
+      file.buffer
+    );
+    payload.image = secure_url;
+  }
+
+  // Hash the password
+  const hashedPassword = await bcrypt.hash(
+    password,
+    Number(config.bcrypt_salt_rounds)
+  );
+
+  // Prisma transaction+
+  const newInstructor = await prisma.$transaction(async (tx) => {
+    // create user
+    const createdUser = await tx.user.create({
+      data: {
+        fullName: payload.fullName,
+        instructorId: payload.instructorId,
+        password: hashedPassword,
+        email: payload.email,
+        image: payload.image,
+        role: UserRole.instructor,
+        needsPasswordChange: false,
+      },
+    });
+
+    // create Instructor
+    const createdInstructor = await tx.instructor.create({
+      data: {
+        fullName: payload.fullName,
+        user: createdUser.email,
+        instructorId: createdUser.instructorId!,
+        email: payload.email,
+        number: payload.number,
+        image: payload.image,
+        isDeleted: false,
+      },
+    });
+
+    return createdInstructor;
+  });
+
+  if (!newInstructor) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      "Failed to create user or Instructor"
+    );
+  }
+
+  return newInstructor;
+};
+
+const createTemporaryAdmin = async (
+  file: any,
+  password: string,
+  payload: {
+    fullName: string;
+    password: string;
+    email: string;
+    image: string;
+    role: string;
+    needsPasswordChange: string;
+  }
+) => {
+  // Check if user exists
+  const isUser = await prisma.user.findUnique({
+    where: { email: payload?.email },
+  });
+
+  if (isUser) {
+    throw new AppError(
+      400,
+      "TemporaryAdmin already exists. Please create a new temporary admin!"
+    );
+  }
+  if (file) {
+    const { secure_url }: any = await uploadToCloudinary(
+      `${payload.email}-${payload.fullName}`,
+      file.buffer
+    );
+    payload.image = secure_url;
+  }
+
+  // Hash the password
+  const hashedPassword = await bcrypt.hash(
+    password,
+    Number(config.bcrypt_salt_rounds)
+  );
+
+  // create user
+  const createdTemporaryAdmin = await prisma.user.create({
+    data: {
+      fullName: payload.fullName,
+      password: hashedPassword,
+      email: payload.email,
+      image: payload.image,
+      role: UserRole.temporaryAdmin,
+      needsPasswordChange: false,
+    },
+  });
+
+  return createdTemporaryAdmin;
+};
+
 export const userServices = {
   createStudent,
+  createTemporaryAdmin,
+  createInstructor,
 };

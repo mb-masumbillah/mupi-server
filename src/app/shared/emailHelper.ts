@@ -2,12 +2,13 @@ import nodemailer from "nodemailer";
 import config from "../config";
 import * as path from "path";
 import * as fs from "fs";
-const Util = require("util");
-const ReadFile = Util.promisify(fs.readFile);
-const Handlebars = require("handlebars");
+import util from "util";
+import handlebars from "handlebars";  // ✔ proper import
+
+const readFile = util.promisify(fs.readFile);
 
 const sendEmail = async (email: string, html: string, subject: string) => {
-  if (!html) {
+  if (!html || html.trim() === "") {
     throw new Error("Email HTML content is empty");
   }
 
@@ -19,7 +20,7 @@ const sendEmail = async (email: string, html: string, subject: string) => {
     },
   });
 
-  return await transporter.sendMail({
+  return transporter.sendMail({
     from: `"Munshiganj Polytechnic Institute" <${config.sender_email}>`,
     to: email,
     subject,
@@ -34,14 +35,17 @@ const createEmailContent = async (
   try {
     const templatePath = path.join(
       process.cwd(),
-      "src",
-      "app",
-      "templates",
+      "src/app/templates",   // ✔ simpler & correct path
       `${templateType}.template.hbs`
     );
 
-    const content = await ReadFile(templatePath, "utf8");
-    const template = Handlebars.compile(content);
+    // ✔ Check if file exists before reading
+    if (!fs.existsSync(templatePath)) {
+      throw new Error(`Template not found: ${templatePath}`);
+    }
+
+    const content = await readFile(templatePath, "utf8");
+    const template = handlebars.compile(content);
 
     return template(data);
   } catch (error) {
