@@ -19,6 +19,8 @@ const createStudent = catchAsync(async(req, res) =>{
     data: result,
   });
 })
+
+
 const createInstructor = catchAsync(async(req, res) =>{
  const { password, instructor: instructorData } = req.body;
 
@@ -37,6 +39,8 @@ const createInstructor = catchAsync(async(req, res) =>{
 })
 const createTemporaryAdmin = catchAsync(async(req, res) =>{
  const { password, temporaryAdmin: temporaryAdminData } = req.body;
+
+ 
 
   const result = await userServices.createTemporaryAdmin(
     req.file,

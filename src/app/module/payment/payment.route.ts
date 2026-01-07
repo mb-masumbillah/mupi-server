@@ -13,3 +13,6 @@ router.post(
   },
   paymentController.createPayement
 );
+
+
+export const paymentRoute = router

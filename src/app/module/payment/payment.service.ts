@@ -3,6 +3,8 @@ import { uploadToCloudinary } from "../../shared/sendImageToCloudinary";
 import { TPayment } from "./payment.interface";
 
 const createPayment = async (file: any, payload: TPayment) => {
+
+
   // 1️⃣ File upload
   if (file) {
     const { secure_url }: any = await uploadToCloudinary(

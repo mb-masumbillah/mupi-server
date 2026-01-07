@@ -4,7 +4,7 @@ import sendResponse from "../../shared/sendResponse";
 import { paymentService } from "./payment.service";
 
 const createPayement = catchAsync(async(req, res) =>{
- const { payment: paymentData } = req.body;
+ const  paymentData = req.body;
 
   const result = await paymentService.createPayment(
     req.file,

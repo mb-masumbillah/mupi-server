@@ -162,13 +162,11 @@ const createTemporaryAdmin = async (
   password: string,
   payload: {
     fullName: string;
-    password: string;
     email: string;
-    image: string;
-    role: string;
-    needsPasswordChange: string;
+    image?: string;
   }
 ) => {
+
   // Check if user exists
   const isUser = await prisma.user.findUnique({
     where: { email: payload?.email },
@@ -202,12 +200,15 @@ const createTemporaryAdmin = async (
       email: payload.email,
       image: payload.image,
       role: UserRole.temporaryAdmin,
+      status: "approved",
       needsPasswordChange: false,
     },
   });
 
   return createdTemporaryAdmin;
 };
+
+
 
 export const userServices = {
   createStudent,
