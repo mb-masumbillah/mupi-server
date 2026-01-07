@@ -1,6 +1,7 @@
 import AppError from "../../error/appError";
 import { prisma } from "../../shared/prisma";
 import { Querybuilder, QueryOptions } from "../../builder/QueryBuilder";
+import { Student, User } from "../../../../generated/prisma/client";
 
 const getAllStudents = async (query: QueryOptions) => {
   const options = Querybuilder(query, ["fullName", "email", "roll"]);
@@ -36,49 +37,61 @@ const getSingleStudent = async (email: string) => {
   return data;
 };
 
-// const deleteStudentDB = async (email: string) => {
-//   const session = await mongoose.startSession();
+const updateStudent = async (
+  email: string,
+  payload: Partial<Omit<Student, "id" | "createdAt" | "updatedAt">>
+) => {
+  const existingStudent = await prisma.student.findUnique({ where: { email } });
+  if (!existingStudent || existingStudent.isDeleted)
+    throw new AppError(404, "Student not found");
 
-//   try {
-//     session.startTransaction();
+  const userPayload: Partial<Omit<User, "id" | "createdAt" | "updatedAt">> = {};
+  if (payload.fullName) userPayload.fullName = payload.fullName;
+  if (payload.email && payload.email !== email)
+    userPayload.email = payload.email;
+  if (payload.roll) userPayload.roll = payload.roll;
+  if (payload.image) userPayload.image = payload.image;
 
-//     const deletedStudent = await Student.findOneAndDelete(
-//       { email },
-//       { session }
-//     );
-//     if (!deletedStudent) {
-//       throw new AppError(StatusCodes.BAD_REQUEST, "Failed to delete student");
-//     }
+  const [updatedStudent] = await prisma.$transaction([
+    prisma.student.update({
+      where: { email },
+      data: payload,
+    }),
+    prisma.user.update({
+      where: { email: existingStudent.user },
+      data: userPayload,
+    }),
+  ]);
 
-//     const deletedUser = await User.findOneAndDelete(deletedStudent.user, {
-//       session,
-//     });
-//     if (!deletedUser) {
-//       throw new AppError(StatusCodes.BAD_REQUEST, "Failed to delete user");
-//     }
+  return updatedStudent;
+};
 
-//     // Commit transaction
-//     await session.commitTransaction();
-//     await session.endSession();
+const deleteStudent = async (email: string) => {
+  const existingStudent = await prisma.student.findUnique({
+    where: { email },
+  });
 
-//     return deletedStudent;
-//   } catch (err) {
-//     await session.abortTransaction();
-//     await session.endSession();
-//     throw err;
-//   }
-// };
+  if (!existingStudent || existingStudent.isDeleted) {
+    throw new AppError(404, "Student not found");
+  }
 
-// const updateStudentIntoDB = async (
-//   email: string,
-//   payload
-// ) => {
+  const [deletedStudent] = await prisma.$transaction([
+    prisma.student.update({
+      where: { email },
+      data: { isDeleted: true },
+    }),
+    prisma.user.update({
+      where: { email: existingStudent.user },
+      data: { isDeleted: true },
+    }),
+  ]);
 
-// };
+  return deletedStudent;
+};
 
 export const StudentServices = {
   getAllStudents,
   getSingleStudent,
-  // deleteStudentDB,
-  // updateStudentIntoDB,
+  updateStudent,
+  deleteStudent
 };

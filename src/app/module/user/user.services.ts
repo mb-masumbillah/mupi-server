@@ -9,6 +9,10 @@ import {
   UserRole,
 } from "../../../../generated/prisma/client";
 import { uploadToCloudinary } from "../../shared/sendImageToCloudinary";
+import { Querybuilder, QueryOptions } from "../../builder/QueryBuilder";
+
+
+
 
 const createStudent = async (file: any, password: string, payload: Student) => {
   // Check if user exists
@@ -208,10 +212,30 @@ const createTemporaryAdmin = async (
   return createdTemporaryAdmin;
 };
 
+const getAllUsers = async (query: QueryOptions) => {
+  const options = Querybuilder(query, ["fullName", "email"]);
+  const { where, skip, take, orderBy, select, page, limit } = options;
+
+  const data = await prisma.user.findMany({ where, skip, take, orderBy, select });
+  const total = await prisma.user.count({ where });
+
+  return {
+    data,
+    meta: { total, page, limit, totalPage: Math.ceil(total / limit) },
+  };
+};
+
+const getSingleUser = async (email: string) => {
+  const data = await prisma.user.findUnique({ where: { email } });
+  if (!data) throw new AppError(404, "User not found");
+  return data;
+};
 
 
 export const userServices = {
   createStudent,
   createTemporaryAdmin,
   createInstructor,
+  getAllUsers,
+  getSingleUser
 };

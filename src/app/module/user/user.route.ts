@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response, Router } from "express";
-import { userContorller } from "./user.controller";
+import { userController } from "./user.controller";
 import { upload } from "../../shared/sendImageToCloudinary";
 
 const router = Router();
@@ -11,7 +11,7 @@ router.post(
     req.body = JSON.parse(req.body.data);
     next();
   },
-  userContorller.createStudent
+  userController.createStudent
 );
 
 router.post(
@@ -21,7 +21,7 @@ router.post(
     req.body = JSON.parse(req.body.data);
     next();
   },
-  userContorller.createInstructor
+  userController.createInstructor
 );
 
 router.post(
@@ -31,7 +31,10 @@ router.post(
     req.body = JSON.parse(req.body.data);
     next();
   },
-  userContorller.createTemporaryAdmin
+  userController.createTemporaryAdmin
 );
+
+router.get("/", userController.getAllUser);
+router.get("/:email", userController.getSingleUser);
 
 export const userRouter = router;

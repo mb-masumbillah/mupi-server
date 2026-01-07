@@ -23,35 +23,38 @@ const getSingleStudent = catchAsync(async (req, res) => {
   });
 });
 
+const updateStudent = catchAsync(async (req, res) => {
+  const email = req.params.email;
+  const payload = req.body;
 
-// const deleteStudent = catchAsync(async (req, res) => {
-//   const { id } = req.params;
-//   const result = await StudentServices.deleteStudentDB(id);
-//   sendResponse(res, {
-//     statusCode: StatusCodes.OK,
-//     success: true,
-//     message: "student is delete successfull",
-//     data: result,
-//   });
-// });
+  const result = await StudentServices.updateStudent(email, payload);
 
-// const updateStudent = catchAsync(async (req, res) => {
-//   const { email } = req.params;
-//   const data = req.body;
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Student updated successfully",
+    data: result,
+  });
+});
 
-//   const result = await StudentServices.updateStudentIntoDB(email, data);
+const deleteStudent = catchAsync(async (req, res) => {
+  const email = req.params.email;
 
-//   sendResponse(res, {
-//     statusCode: StatusCodes.OK,
-//     success: true,
-//     message: "student is update successfull",
-//     data: result,
-//   });
-// });
+  const result = await StudentServices.deleteStudent(email);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Student deleted successfully",
+    data: result,
+  });
+});
+
+
 
 export const StudentController = {
   getAllStudent,
   getSingleStudent,
-  // deleteStudent,
-  // updateStudent,
+  updateStudent,
+  deleteStudent
 };

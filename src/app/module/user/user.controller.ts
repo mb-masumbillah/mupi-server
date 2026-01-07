@@ -3,8 +3,8 @@ import catchAsync from "../../shared/catchAsync";
 import sendResponse from "../../shared/sendResponse";
 import { userServices } from "./user.services";
 
-const createStudent = catchAsync(async(req, res) =>{
- const { password, student: studentData } = req.body;
+const createStudent = catchAsync(async (req, res) => {
+  const { password, student: studentData } = req.body;
 
   const result = await userServices.createStudent(
     req.file,
@@ -18,11 +18,10 @@ const createStudent = catchAsync(async(req, res) =>{
     message: "Student create successfull",
     data: result,
   });
-})
+});
 
-
-const createInstructor = catchAsync(async(req, res) =>{
- const { password, instructor: instructorData } = req.body;
+const createInstructor = catchAsync(async (req, res) => {
+  const { password, instructor: instructorData } = req.body;
 
   const result = await userServices.createInstructor(
     req.file,
@@ -36,11 +35,10 @@ const createInstructor = catchAsync(async(req, res) =>{
     message: "Instructor create successfull",
     data: result,
   });
-})
-const createTemporaryAdmin = catchAsync(async(req, res) =>{
- const { password, temporaryAdmin: temporaryAdminData } = req.body;
+});
 
- 
+const createTemporaryAdmin = catchAsync(async (req, res) => {
+  const { password, temporaryAdmin: temporaryAdminData } = req.body;
 
   const result = await userServices.createTemporaryAdmin(
     req.file,
@@ -54,10 +52,32 @@ const createTemporaryAdmin = catchAsync(async(req, res) =>{
     message: "Temporary-Admin create successfull",
     data: result,
   });
-})
+});
 
-export const userContorller = {
-    createStudent,
-    createInstructor,
-    createTemporaryAdmin
-}
+const getAllUser = catchAsync(async (req, res) => {
+  const result = await userServices.getAllUsers(req.query);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Users retrieved",
+    data: result,
+  });
+});
+
+const getSingleUser = catchAsync(async (req, res) => {
+  const result = await userServices.getSingleUser(req.params.email);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "User retrieved",
+    data: result,
+  });
+});
+
+export const userController = {
+  createStudent,
+  createInstructor,
+  createTemporaryAdmin,
+  getAllUser,
+  getSingleUser,
+};

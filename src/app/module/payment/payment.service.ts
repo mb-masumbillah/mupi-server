@@ -1,3 +1,5 @@
+import { Querybuilder, QueryOptions } from "../../builder/QueryBuilder";
+import AppError from "../../error/appError";
 import { prisma } from "../../shared/prisma";
 import { uploadToCloudinary } from "../../shared/sendImageToCloudinary";
 import { TPayment } from "./payment.interface";
@@ -45,6 +47,43 @@ const createPayment = async (file: any, payload: TPayment) => {
   return payment;
 };
 
+const getAllPayments = async (query: QueryOptions) => {
+  const options = Querybuilder(query, ["roll", "txnId", "number", "semester"]);
+  const { where, skip, take, orderBy, select, page, limit } = options;
+
+  const data = await prisma.payment.findMany({
+    where,
+    skip,
+    take,
+    orderBy,
+    include: { repeats: true },
+  });
+
+  const total = await prisma.payment.count({ where });
+
+  return {
+    data,
+    meta: { total, page, limit, totalPage: Math.ceil(total / limit) },
+  };
+};
+
+const getSinglePayment = async (roll: string) => {
+  const data = await prisma.payment.findUnique({
+    where: { roll }, 
+    include: { repeats: true },
+  });
+
+  if (!data) { // isDeleted manual check
+    throw new AppError(404, "Payment not found");
+  }
+
+  return data;
+};
+
+
+
 export const paymentService = {
   createPayment,
+  getAllPayments,
+  getSinglePayment
 };

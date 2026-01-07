@@ -14,5 +14,8 @@ router.post(
   paymentController.createPayement
 );
 
+router.get("/", paymentController.getAllPayment);
+router.get("/:roll", paymentController.getSinglePayment);
+
 
 export const paymentRoute = router
