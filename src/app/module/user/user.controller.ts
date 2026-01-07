@@ -74,10 +74,89 @@ const getSingleUser = catchAsync(async (req, res) => {
   });
 });
 
+const changeStatus = catchAsync(async (req, res) => {
+  const email = req.params.email;
+
+  const result = await userServices.changeStatus(email, req.body);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: "Status is updated successfully",
+    data: result,
+  });
+});
+
+const getMe = catchAsync(async (req, res) => {
+  const { email, role } = req.user;
+
+  const result = await userServices.getMe(email, role);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: "User is retrieved successfully",
+    data: result,
+  });
+});
+
+
+// parmanently delete
+
+// Temporary Admin delete
+const deleteTempAdmin = catchAsync(async (req, res) => {
+  const email = req.params.email;
+
+  const result = await userServices.deleteTemporaryAdmin(email);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: "Temporary Admin deleted permanently",
+    data: result,
+  });
+});
+
+// Student delete
+const deleteStudent = catchAsync(async (req, res) => {
+  const email = req.params.email;
+
+  const result = await userServices.deleteStudent(email);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: "Student deleted permanently",
+    data: result,
+  });
+});
+
+// Instructor delete
+const deleteInstructor = catchAsync(async (req, res) => {
+  const email = req.params.email;
+
+  const result = await userServices.deleteInstructor(email);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: "Instructor deleted permanently",
+    data: result,
+  });
+});
+
+
+
 export const userController = {
   createStudent,
   createInstructor,
   createTemporaryAdmin,
   getAllUser,
   getSingleUser,
+  changeStatus,
+  getMe,
+
+  deleteTempAdmin,
+  deleteStudent,
+  deleteInstructor,
 };
