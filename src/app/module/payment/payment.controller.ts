@@ -36,8 +36,33 @@ const getSinglePayment = catchAsync(async (req, res) => {
   });
 });
 
+const updatePayment = catchAsync(async (req, res) => {
+  const roll = req.params.roll;
+  const payload = req.body;
+  const result = await paymentService.updatePayment(roll, payload, req.file);
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: "Payment updated successfully",
+    data: result,
+  });
+});
+
+const deletePayment = catchAsync(async (req, res) => {
+  const roll = req.params.roll;
+  const result = await paymentService.deletePayment(roll);
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: "Payment deleted successfully",
+    data: result,
+  });
+});
+
 export const paymentController = {
   createPayement,
   getAllPayment,
   getSinglePayment,
+  updatePayment,
+  deletePayment,
 };

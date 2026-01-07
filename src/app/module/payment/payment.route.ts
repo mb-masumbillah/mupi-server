@@ -17,5 +17,16 @@ router.post(
 router.get("/", paymentController.getAllPayment);
 router.get("/:roll", paymentController.getSinglePayment);
 
+router.patch(
+  "/update/:roll",
+  upload.single("file"),
+  (req, res, next) => {
+    if (req.body.data) req.body = JSON.parse(req.body.data);
+    next();
+  },
+  paymentController.updatePayment
+);
 
-export const paymentRoute = router
+router.delete("/delete/:roll", paymentController.deletePayment);
+
+export const paymentRoute = router;

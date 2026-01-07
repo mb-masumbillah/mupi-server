@@ -80,10 +80,83 @@ const getSinglePayment = async (roll: string) => {
   return data;
 };
 
+const updatePayment = async (roll: string, payload: Partial<TPayment>, file?: any) => {
+  // 1️⃣ File upload (optional)
+  if (file) {
+    const { secure_url }: any = await uploadToCloudinary(`${roll}`, file.buffer);
+    payload.image = secure_url;
+  }
+
+  const updatedPayment = await prisma.$transaction(async (tx) => {
+    const existingPayment = await tx.payment.findUnique({
+      where: { roll },
+      include: { repeats: true },
+    });
+
+    if (!existingPayment) throw new AppError(404, "Payment not found");
+
+    // যদি payload এ repeats থাকে, old delete + new create
+    if (payload.repeats) {
+      if (existingPayment.repeats.length > 0) {
+        await tx.repeat.deleteMany({ where: { paymentId: existingPayment.id } });
+      }
+      // nested create
+      payload.repeats = payload.repeats.map(r => ({
+        semester: r.semester,
+        subject: r.subject,
+      }));
+    }
+
+    // update payment (partial)
+    const payment = await tx.payment.update({
+      where: { roll },
+      data: {
+        amount: payload.amount,
+        txnId: payload.txnId,
+        number: payload.number,
+        semester: payload.semester,
+        status: payload.status,
+        image: payload.image,
+        repeats: payload.repeats ? { create: payload.repeats } : undefined,
+      },
+      include: { repeats: true },
+    });
+
+    return payment;
+  });
+
+  return updatedPayment;
+};
+
+// DELETE Payment
+const deletePayment = async (roll: string) => {
+  const deletedPayment = await prisma.$transaction(async (tx) => {
+    const existingPayment = await tx.payment.findUnique({
+      where: { roll },
+      include: { repeats: true },
+    });
+
+    if (!existingPayment) throw new AppError(404, "Payment not found");
+
+    // delete repeats
+    if (existingPayment.repeats.length > 0) {
+      await tx.repeat.deleteMany({ where: { paymentId: existingPayment.id } });
+    }
+
+    // delete payment
+    const payment = await tx.payment.delete({ where: { roll } });
+    return payment;
+  });
+
+  return deletedPayment;
+};
+
 
 
 export const paymentService = {
   createPayment,
   getAllPayments,
-  getSinglePayment
+  getSinglePayment,
+  updatePayment,
+  deletePayment
 };
