@@ -2,6 +2,7 @@ import AppError from "../../error/appError";
 import { prisma } from "../../shared/prisma";
 import { Querybuilder, QueryOptions } from "../../builder/QueryBuilder";
 import { Student, User } from "../../../../generated/prisma/client";
+import { uploadToCloudinary } from "../../shared/sendImageToCloudinary";
 
 const getAllStudents = async (query: QueryOptions) => {
   const options = Querybuilder(query, ["fullName", "email", "roll"]);
@@ -39,11 +40,20 @@ const getSingleStudent = async (email: string) => {
 
 const updateStudent = async (
   email: string,
-  payload: Partial<Omit<Student, "id" | "createdAt" | "updatedAt">>
+  payload: Partial<Omit<Student, "id" | "createdAt" | "updatedAt">>,
+  file?: any
 ) => {
   const existingStudent = await prisma.student.findUnique({ where: { email } });
   if (!existingStudent || existingStudent.isDeleted)
     throw new AppError(404, "Student not found");
+
+  if (file) {
+    const { secure_url }: any = await uploadToCloudinary(
+      `${email}-${payload.fullName}`,
+      file.buffer
+    );
+    payload.image = secure_url;
+  }
 
   const userPayload: Partial<Omit<User, "id" | "createdAt" | "updatedAt">> = {};
   if (payload.fullName) userPayload.fullName = payload.fullName;
@@ -93,5 +103,5 @@ export const StudentServices = {
   getAllStudents,
   getSingleStudent,
   updateStudent,
-  deleteStudent
+  deleteStudent,
 };

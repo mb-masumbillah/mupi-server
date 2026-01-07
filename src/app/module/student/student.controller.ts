@@ -27,7 +27,7 @@ const updateStudent = catchAsync(async (req, res) => {
   const email = req.params.email;
   const payload = req.body;
 
-  const result = await StudentServices.updateStudent(email, payload);
+  const result = await StudentServices.updateStudent(email, payload, req.file);
 
   sendResponse(res, {
     statusCode: 200,
