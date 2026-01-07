@@ -1,0 +1,87 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                  String     @id @default(uuid())
+  fullName            String
+  roll                String     @unique
+  password            String
+  email               String     @unique
+  image               String     @default("")
+  needsPasswordChange Boolean    @default(false)
+  passwordChangedAt   DateTime?
+  role                UserRole
+  status              UserStatus @default(pending)
+  isDeleted           Boolean    @default(false)
+  lastLogin           DateTime   @default(now())
+  otpToken            String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  students  Student[]
+
+  @@map("users")
+}
+
+model Student {
+  id           String     @id @default(uuid())
+  fullName     String
+  user         String
+  users        User       @relation(fields: [user], references: [email])
+  roll         String     @unique
+  registration String     @unique
+  department   Department
+  session      String
+  shift        Shift
+  semester     Semester
+  email        String     @unique
+  number       String
+  image        String     @default("")
+  isDeleted    Boolean    @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("students")
+}
+
+enum Department {
+  CST
+  EEE
+  Civil
+  Mechanical
+}
+
+enum Shift {
+  FIRST
+  SECOND
+}
+
+enum Semester {
+  FIRST
+  SECOND
+  THIRD
+  FOURTH
+  FIFTH
+  SIXTH
+  SEVENTH
+  EIGHTH
+}
+
+enum UserRole {
+  superAdmin
+  temporaryAdmin
+  student
+  instructor
+}
+
+enum UserStatus {
+  pending
+  approved
+}
