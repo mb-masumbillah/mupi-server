@@ -257,6 +257,7 @@ const changeStatus = async (email: string, payload: ChangeStatusPayload) => {
 };
 
 const getMe = async (email: string, role: string) => {
+
   let result = null;
 
   if (role === "student") {

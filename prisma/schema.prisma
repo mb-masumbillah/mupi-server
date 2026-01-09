@@ -82,6 +82,7 @@ model Payment {
   status    String   @default("pending")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  isDeleted Boolean  @default(false)
   repeats   Repeat[]
 
   @@map("payments")

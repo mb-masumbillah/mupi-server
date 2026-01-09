@@ -87,11 +87,14 @@ const updatePayment = async (roll: string, payload: Partial<TPayment>, file?: an
     payload.image = secure_url;
   }
 
+
   const updatedPayment = await prisma.$transaction(async (tx) => {
     const existingPayment = await tx.payment.findUnique({
       where: { roll },
       include: { repeats: true },
     });
+
+    console.log(existingPayment)
 
     if (!existingPayment) throw new AppError(404, "Payment not found");
 

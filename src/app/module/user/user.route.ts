@@ -47,14 +47,14 @@ router.post(
 );
 
 router.get(
-  "/me",
+  "/profile",
   auth(
     UserRole.superAdmin,
     UserRole.temporaryAdmin,
     UserRole.student,
     UserRole.instructor
   ),
-  userController.getMe
+  // userController.getMe
 );
 
 

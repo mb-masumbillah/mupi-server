@@ -88,7 +88,12 @@ const changeStatus = catchAsync(async (req, res) => {
 });
 
 const getMe = catchAsync(async (req, res) => {
+
+  console.log("--> ", req)
+
   const { email, role } = req.user;
+
+  return
 
   const result = await userServices.getMe(email, role);
 
