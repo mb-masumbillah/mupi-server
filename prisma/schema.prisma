@@ -98,27 +98,70 @@ model Repeat {
   @@map("repeats")
 }
 
+model Attendance {
+  id          String   @id @default(uuid())
+  date        DateTime @default(now())
+  subjectCode String
+
+  department Department
+  session    String
+  semester   Semester
+  shift      Shift
+
+  instructorId   String
+  instructorName String
+
+  records AttendanceRecord[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("attendances")
+}
+
+model AttendanceRecord {
+  id String @id @default(uuid())
+
+  studentRoll String
+  studentName String
+  status      AttendanceStatus
+
+  attendanceId String
+  attendance   Attendance @relation(fields: [attendanceId], references: [id])
+
+  @@map("attendance_records")
+}
+
+enum AttendanceStatus {
+  present
+  absent
+}
+
 enum Department {
-  CST
-  EEE
+  Computer
   Civil
+  Electrical
   Mechanical
+  IPCT
+  Electronics
+  Electro_Medical
+  RAC
 }
 
 enum Shift {
-  FIRST
-  SECOND
+  First
+  Second
 }
 
 enum Semester {
-  FIRST
-  SECOND
-  THIRD
-  FOURTH
-  FIFTH
-  SIXTH
-  SEVENTH
-  EIGHTH
+  First
+  Second
+  Third
+  Fourth
+  Fifth
+  Sixth
+  Seventh
+  Eighth
 }
 
 enum UserRole {
