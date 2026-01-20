@@ -103,6 +103,17 @@ CREATE TABLE "repeats" (
 );
 
 -- CreateTable
+CREATE TABLE "notices" (
+    "id" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "pdfUrl" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "notices_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "attendances" (
     "id" TEXT NOT NULL,
     "date" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,

@@ -256,31 +256,20 @@ const changeStatus = async (email: string, payload: ChangeStatusPayload) => {
   return updatedUser;
 };
 
-const getMe = async (email: string, role: string) => {
-
+export const getMe = async (email: string, role: string) => {
   let result = null;
 
   if (role === "student") {
-    // Student + related User
     result = await prisma.student.findUnique({
       where: { email },
-      include: {
-        users: true,
-      },
+      include: { users: true }, // যদি relation থাকে
     });
-  }
-
-  if (role === "instructor") {
-    // Instructor + related User
+  } else if (role === "instructor") {
     result = await prisma.instructor.findUnique({
       where: { email },
-      include: {
-        users: true,
-      },
+      include: { users: true },
     });
-  }
-
-  if (role === "superAdmin" || role === "temporaryAdmin") {
+  } else if (role === "superAdmin" || role === "temporaryAdmin") {
     result = await prisma.user.findUnique({
       where: { email },
     });

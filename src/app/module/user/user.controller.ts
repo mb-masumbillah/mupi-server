@@ -87,24 +87,20 @@ const changeStatus = catchAsync(async (req, res) => {
   });
 });
 
-const getMe = catchAsync(async (req, res) => {
+export const getMeController = catchAsync(async (req, res) => {
 
-  console.log("--> ", req)
 
   const { email, role } = req.user;
-
-  return
 
   const result = await userServices.getMe(email, role);
 
   sendResponse(res, {
     statusCode: StatusCodes.OK,
     success: true,
-    message: "User is retrieved successfully",
+    message: "User profile retrieved successfully",
     data: result,
   });
 });
-
 
 // parmanently delete
 
@@ -159,7 +155,7 @@ export const userController = {
   getAllUser,
   getSingleUser,
   changeStatus,
-  getMe,
+ getMeController,
 
   deleteTempAdmin,
   deleteStudent,

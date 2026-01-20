@@ -1,8 +1,7 @@
 import { NextFunction, Request, Response, Router } from "express";
 import { userController } from "./user.controller";
 import { upload } from "../../shared/sendImageToCloudinary";
-import auth from "../../middleware/auth";
-import { UserRole } from "../../../../generated/prisma/enums";
+import auth, { USER_ROLE } from "../../middleware/auth";
 
 const router = Router();
 
@@ -13,7 +12,7 @@ router.post(
     req.body = JSON.parse(req.body.data);
     next();
   },
-  userController.createStudent
+  userController.createStudent,
 );
 
 router.post(
@@ -23,7 +22,7 @@ router.post(
     req.body = JSON.parse(req.body.data);
     next();
   },
-  userController.createInstructor
+  userController.createInstructor,
 );
 
 router.post(
@@ -33,50 +32,48 @@ router.post(
     req.body = JSON.parse(req.body.data);
     next();
   },
-  userController.createTemporaryAdmin
+  userController.createTemporaryAdmin,
 );
 
-router.get("/", userController.getAllUser);
+router.get("/", auth(USER_ROLE.superAdmin), userController.getAllUser);
 router.get("/:email", userController.getSingleUser);
 
 router.post(
   "/change-status/:email",
   // auth(USER_ROLE.superAdmin, USER_ROLE.admin),
   // validationRequest(UserValidation.changeStatusValidationSchema),
-  userController.changeStatus
+  userController.changeStatus,
 );
 
-router.get(
-  "/profile",
+router.post(
+  "/me",
   auth(
-    UserRole.superAdmin,
-    UserRole.temporaryAdmin,
-    UserRole.student,
-    UserRole.instructor
+    USER_ROLE.instructor,
+    USER_ROLE.superAdmin,
+    USER_ROLE.temporaryAdmin,
+    USER_ROLE.student,
   ),
-  // userController.getMe
+  userController.getMeController,
 );
-
-
 
 // parmanently delete
 
 router.delete(
   "/tempAdmin-delete/:email",
   // auth(UserRole.superAdmin),
-  userController.deleteTempAdmin
+  userController.deleteTempAdmin,
 );
 
 router.delete(
   "/student-delete/:email",
   // auth(UserRole.superAdmin),
-  userController.deleteStudent
+  userController.deleteStudent,
 );
 
 router.delete(
   "/instructor-delete/:email",
   // auth(UserRole.superAdmin),
-  userController.deleteInstructor
+  userController.deleteInstructor,
 );
 
 export const userRouter = router;
