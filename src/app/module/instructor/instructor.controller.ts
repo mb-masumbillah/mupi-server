@@ -4,7 +4,7 @@ import sendResponse from "../../shared/sendResponse";
 import { instructorServices } from "./instructor.service";
 
 const getAllInstructor = catchAsync(async (req, res) => {
-  const result = await instructorServices.getAllInstructors(req.query);
+  const result = await instructorServices.getAllInstructors();
   sendResponse(res, {
     statusCode: 200,
     success: true,

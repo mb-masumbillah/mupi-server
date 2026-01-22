@@ -17,7 +17,7 @@ const createPayement = catchAsync(async (req, res) => {
 });
 
 const getAllPayment = catchAsync(async (req, res) => {
-  const result = await paymentService.getAllPayments(req.query);
+  const result = await paymentService.getAllPayments();
   sendResponse(res, {
     statusCode: 200,
     success: true,

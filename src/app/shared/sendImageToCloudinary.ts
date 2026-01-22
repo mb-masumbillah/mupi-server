@@ -26,7 +26,7 @@ export const uploadToCloudinary = (imageName: string, fileBuffer: Buffer) => {
       (error, result) => {
         if (error) return reject(error);
         resolve(result);
-      }
+      },
     );
     stream.end(fileBuffer); // push buffer to Cloudinary
   });

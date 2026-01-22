@@ -77,7 +77,7 @@ const getSingleUser = catchAsync(async (req, res) => {
 const changeStatus = catchAsync(async (req, res) => {
   const email = req.params.email;
 
-  const result = await userServices.changeStatus(email, req.body);
+  const result = await userServices.changeStatus(email);
 
   sendResponse(res, {
     statusCode: StatusCodes.OK,

@@ -1,6 +1,6 @@
 import catchAsync from "../shared/catchAsync";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { prisma } from "../shared/prisma";
+import  prisma  from "../shared/prisma";
 import { StatusCodes } from "http-status-codes";
 import AppError from "../error/appError";
 import config from "../config";
@@ -17,8 +17,8 @@ export type TuserRole = keyof typeof USER_ROLE;
 const auth = (...requiredRoles: TuserRole[]) => {
   return catchAsync(async (req, res, next) => {
     const token = req.headers.authorization;
-    console.log({token})
-    
+    console.log({ token });
+
     if (!token) {
       throw new AppError(StatusCodes.UNAUTHORIZED, "You are not Authorized");
     }
@@ -72,6 +72,5 @@ const auth = (...requiredRoles: TuserRole[]) => {
     next();
   });
 };
-
 
 export default auth;

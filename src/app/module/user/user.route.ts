@@ -35,12 +35,20 @@ router.post(
   userController.createTemporaryAdmin,
 );
 
-router.get("/", auth(USER_ROLE.superAdmin), userController.getAllUser);
-router.get("/:email", userController.getSingleUser);
+router.get(
+  "/",
+  auth(USER_ROLE.superAdmin, USER_ROLE.temporaryAdmin),
+  userController.getAllUser,
+);
+router.get(
+  "/:email",
+  auth(USER_ROLE.superAdmin, USER_ROLE.temporaryAdmin),
+  userController.getSingleUser,
+);
 
-router.post(
+router.patch(
   "/change-status/:email",
-  // auth(USER_ROLE.superAdmin, USER_ROLE.admin),
+  auth(USER_ROLE.superAdmin, USER_ROLE.temporaryAdmin),
   // validationRequest(UserValidation.changeStatusValidationSchema),
   userController.changeStatus,
 );
@@ -60,19 +68,19 @@ router.post(
 
 router.delete(
   "/tempAdmin-delete/:email",
-  // auth(UserRole.superAdmin),
+  auth(USER_ROLE.superAdmin, USER_ROLE.temporaryAdmin),
   userController.deleteTempAdmin,
 );
 
 router.delete(
   "/student-delete/:email",
-  // auth(UserRole.superAdmin),
+  auth(USER_ROLE.superAdmin, USER_ROLE.temporaryAdmin),
   userController.deleteStudent,
 );
 
 router.delete(
   "/instructor-delete/:email",
-  // auth(UserRole.superAdmin),
+  auth(USER_ROLE.superAdmin, USER_ROLE.temporaryAdmin),
   userController.deleteInstructor,
 );
 

@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 import AppError from "../../error/appError";
 import { StatusCodes } from "http-status-codes";
 import config from "../../config";
-import { prisma } from "../../shared/prisma";
+import prisma from "../../shared/prisma";
 import {
   Instructor,
   Student,
@@ -24,7 +24,7 @@ const createStudent = async (file: any, password: string, payload: Student) => {
   if (isUser) {
     throw new AppError(
       400,
-      "Student already exists. Please create a new student!"
+      "Student already exists. Please create a new student!",
     );
   }
 
@@ -32,7 +32,7 @@ const createStudent = async (file: any, password: string, payload: Student) => {
   if (file) {
     const { secure_url }: any = await uploadToCloudinary(
       `${payload.email}-${payload.fullName}`,
-      file.buffer
+      file.buffer,
     );
     payload.image = secure_url;
   }
@@ -40,7 +40,7 @@ const createStudent = async (file: any, password: string, payload: Student) => {
   // Hash the password
   const hashedPassword = await bcrypt.hash(
     password,
-    Number(config.bcrypt_salt_rounds)
+    Number(config.bcrypt_salt_rounds),
   );
 
   // Prisma transaction+
@@ -82,7 +82,7 @@ const createStudent = async (file: any, password: string, payload: Student) => {
   if (!newStudent) {
     throw new AppError(
       StatusCodes.BAD_REQUEST,
-      "Failed to create user or student"
+      "Failed to create user or student",
     );
   }
 
@@ -92,7 +92,7 @@ const createStudent = async (file: any, password: string, payload: Student) => {
 const createInstructor = async (
   file: any,
   password: string,
-  payload: Instructor
+  payload: Instructor,
 ) => {
   // Check if user exists
   const isUser = await prisma.user.findUnique({
@@ -102,7 +102,7 @@ const createInstructor = async (
   if (isUser) {
     throw new AppError(
       400,
-      "Instructor already exists. Please create a new Instructor!"
+      "Instructor already exists. Please create a new Instructor!",
     );
   }
 
@@ -110,7 +110,7 @@ const createInstructor = async (
   if (file) {
     const { secure_url }: any = await uploadToCloudinary(
       `${payload.email}-${payload.fullName}`,
-      file.buffer
+      file.buffer,
     );
     payload.image = secure_url;
   }
@@ -118,7 +118,7 @@ const createInstructor = async (
   // Hash the password
   const hashedPassword = await bcrypt.hash(
     password,
-    Number(config.bcrypt_salt_rounds)
+    Number(config.bcrypt_salt_rounds),
   );
 
   // Prisma transaction+
@@ -155,7 +155,7 @@ const createInstructor = async (
   if (!newInstructor) {
     throw new AppError(
       StatusCodes.BAD_REQUEST,
-      "Failed to create user or Instructor"
+      "Failed to create user or Instructor",
     );
   }
 
@@ -169,7 +169,7 @@ const createTemporaryAdmin = async (
     fullName: string;
     email: string;
     image?: string;
-  }
+  },
 ) => {
   // Check if user exists
   const isUser = await prisma.user.findUnique({
@@ -179,13 +179,13 @@ const createTemporaryAdmin = async (
   if (isUser) {
     throw new AppError(
       400,
-      "TemporaryAdmin already exists. Please create a new temporary admin!"
+      "TemporaryAdmin already exists. Please create a new temporary admin!",
     );
   }
   if (file) {
     const { secure_url }: any = await uploadToCloudinary(
       `${payload.email}-${payload.fullName}`,
-      file.buffer
+      file.buffer,
     );
     payload.image = secure_url;
   }
@@ -193,7 +193,7 @@ const createTemporaryAdmin = async (
   // Hash the password
   const hashedPassword = await bcrypt.hash(
     password,
-    Number(config.bcrypt_salt_rounds)
+    Number(config.bcrypt_salt_rounds),
   );
 
   // create user
@@ -237,7 +237,7 @@ const getSingleUser = async (email: string) => {
   return data;
 };
 
-const changeStatus = async (email: string, payload: ChangeStatusPayload) => {
+const changeStatus = async (email: string) => {
   // Check if user exists
   const existingUser = await prisma.user.findUnique({
     where: { email },
@@ -249,7 +249,7 @@ const changeStatus = async (email: string, payload: ChangeStatusPayload) => {
   const updatedUser = await prisma.user.update({
     where: { email },
     data: {
-      status: payload.status,
+      status: "approved",
     },
   });
 

@@ -1,7 +1,6 @@
-import { prisma } from "../../shared/prisma";
+import prisma  from "../../shared/prisma";
 import AppError from "../../error/appError";
 import { StatusCodes } from "http-status-codes";
-import axios from "axios";
 import { uploadPdfToCloudinary } from "../../shared/sendPdfToCloudinary";
 
 const createNotice = async (file: any, payload: any) => {

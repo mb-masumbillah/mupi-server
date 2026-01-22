@@ -1,6 +1,6 @@
 import { Querybuilder, QueryOptions } from "../../builder/QueryBuilder";
 import AppError from "../../error/appError";
-import { prisma } from "../../shared/prisma";
+import  prisma  from "../../shared/prisma";
 import { uploadToCloudinary } from "../../shared/sendImageToCloudinary";
 import { TPayment } from "./payment.interface";
 
@@ -47,25 +47,37 @@ const createPayment = async (file: any, payload: TPayment) => {
   return payment;
 };
 
-const getAllPayments = async (query: QueryOptions) => {
-  const options = Querybuilder(query, ["roll", "txnId", "number", "semester"]);
-  const { where, skip, take, orderBy, select, page, limit } = options;
+// const getAllPayments = async (query: QueryOptions) => {
+//   const options = Querybuilder(query, ["roll", "txnId", "number", "semester"]);
+//   const { where, skip, take, orderBy, select, page, limit } = options;
 
+//   const data = await prisma.payment.findMany({
+//     where,
+//     skip,
+//     take,
+//     orderBy,
+//     include: { repeats: true },
+//   });
+
+//   const total = await prisma.payment.count({ where });
+
+//   return {
+//     data,
+//     meta: { total, page, limit, totalPage: Math.ceil(total / limit) },
+//   };
+// };
+
+const getAllPayments = async () => {
   const data = await prisma.payment.findMany({
-    where,
-    skip,
-    take,
-    orderBy,
+    orderBy: {
+      createdAt: "desc", // নতুন payment উপরে দেখাবে
+    },
     include: { repeats: true },
   });
 
-  const total = await prisma.payment.count({ where });
-
-  return {
-    data,
-    meta: { total, page, limit, totalPage: Math.ceil(total / limit) },
-  };
+  return data;
 };
+
 
 const getSinglePayment = async (roll: string) => {
   const data = await prisma.payment.findUnique({

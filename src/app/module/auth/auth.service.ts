@@ -1,14 +1,13 @@
 import bcrypt from "bcrypt";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { IJwtPayload, TLoginUser } from "./auth.interface";
-import { prisma } from "../../shared/prisma";
+import  prisma  from "../../shared/prisma";
 import AppError from "../../error/appError";
 import { StatusCodes } from "http-status-codes";
 import { createToken, verifyToken } from "./auth.utils";
 import config from "../../config";
 import { generateOtp } from "../../shared/generateOtp";
 import { EmailHelper } from "../../shared/emailHelper";
-
 
 const loginUser = async (payload: TLoginUser) => {
   const user = await prisma.user.findFirst({
@@ -48,13 +47,13 @@ const loginUser = async (payload: TLoginUser) => {
   const accessToken = createToken(
     jwtPayload,
     config.jwt_access_secret as string,
-    config.jwt_access_expires_in as string
+    config.jwt_access_expires_in as string,
   );
 
   const refreshToken = createToken(
     jwtPayload,
     config.jwt_refresh_secret as string,
-    config.jwt_refresh_expires_in as string
+    config.jwt_refresh_expires_in as string,
   );
 
   await prisma.user.update({
@@ -73,7 +72,7 @@ const loginUser = async (payload: TLoginUser) => {
 
 const changePassword = async (
   userData: JwtPayload,
-  payload: { oldPassword: string; newPassword: string }
+  payload: { oldPassword: string; newPassword: string },
 ) => {
   const user = await prisma.user.findUnique({
     where: { email: userData.user as string },
@@ -94,7 +93,7 @@ const changePassword = async (
 
   const newHashedPassword = await bcrypt.hash(
     payload.newPassword,
-    Number(config.bcrypt_salt_rounds)
+    Number(config.bcrypt_salt_rounds),
   );
 
   await prisma.user.update({
@@ -148,7 +147,7 @@ const refreshAccessToken = async (token: string) => {
   const newAccessToken = createToken(
     jwtPayload,
     config.jwt_access_secret as string,
-    config.jwt_access_expires_in as string
+    config.jwt_access_expires_in as string,
   );
 
   return { accessToken: newAccessToken };
@@ -179,7 +178,7 @@ const forgotPassword = async ({ email }: { email: string }) => {
   try {
     const emailContent = await EmailHelper.createEmailContent(
       { otpCode: otp },
-      "forgotPassword"
+      "forgotPassword",
     );
 
     await EmailHelper.sendEmail(email, emailContent, "Reset Password OTP");
@@ -193,7 +192,7 @@ const forgotPassword = async ({ email }: { email: string }) => {
 
     throw new AppError(
       StatusCodes.INTERNAL_SERVER_ERROR,
-      "Failed to send OTP email. Please try again later."
+      "Failed to send OTP email. Please try again later.",
     );
   }
 };
@@ -228,7 +227,7 @@ const verifyOTP = async ({ email, otp }: { email: string; otp: string }) => {
   const resetToken = jwt.sign(
     { email },
     config.jwt_pass_reset_secret as string,
-    { expiresIn: "15m" }
+    { expiresIn: "15m" },
   );
 
   return { resetToken };
@@ -258,7 +257,7 @@ const resetPassword = async ({
 
   const hashedPassword = await bcrypt.hash(
     newPassword,
-    Number(config.bcrypt_salt_rounds)
+    Number(config.bcrypt_salt_rounds),
   );
 
   await prisma.user.update({

@@ -3,7 +3,7 @@ import config from "../config";
 import * as path from "path";
 import * as fs from "fs";
 import util from "util";
-import handlebars from "handlebars";  // ✔ proper import
+import handlebars from "handlebars"; // ✔ proper import
 
 const readFile = util.promisify(fs.readFile);
 
@@ -30,13 +30,13 @@ const sendEmail = async (email: string, html: string, subject: string) => {
 
 const createEmailContent = async (
   data: Record<string, any>,
-  templateType: string
+  templateType: string,
 ): Promise<string> => {
   try {
     const templatePath = path.join(
       process.cwd(),
-      "src/app/templates",   // ✔ simpler & correct path
-      `${templateType}.template.hbs`
+      "src/app/templates", // ✔ simpler & correct path
+      `${templateType}.template.hbs`,
     );
 
     // ✔ Check if file exists before reading

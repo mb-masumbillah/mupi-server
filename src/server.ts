@@ -4,9 +4,9 @@ import config from "./app/config";
 import seedSuperAdmin from "./app/DB/seed";
 
 async function main() {
-  const server: Server = app.listen(config.port, () => {
-    seedSuperAdmin()
-    console.log("Sever is running on port ", config.port);
+  const server: Server = app.listen(config.port, async () => {
+    console.log("Server is running on port", config.port);
+    await seedSuperAdmin(); // async call, await added
   });
 
   const exitHandler = () => {
@@ -17,13 +17,14 @@ async function main() {
     }
     process.exit(1);
   };
+
   process.on("uncaughtException", (error) => {
-    console.log(error);
+    console.error("Uncaught Exception:", error);
     exitHandler();
   });
 
   process.on("unhandledRejection", (error) => {
-    console.log(error);
+    console.error("Unhandled Rejection:", error);
     exitHandler();
   });
 }

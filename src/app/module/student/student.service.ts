@@ -1,38 +1,62 @@
 import AppError from "../../error/appError";
-import { prisma } from "../../shared/prisma";
+import prisma from "../../shared/prisma";
 import { Querybuilder, QueryOptions } from "../../builder/QueryBuilder";
 import { Student, User } from "../../../../generated/prisma/client";
 import { uploadToCloudinary } from "../../shared/sendImageToCloudinary";
+import { userSafeFields } from "../user/user.constant";
 
-const getAllStudents = async (query: QueryOptions) => {
-  const options = Querybuilder(query, ["fullName", "email", "roll"]);
+// const getAllStudents = async (query: QueryOptions) => {
+//   const options = Querybuilder(query, ["fullName", "email", "roll"]);
 
-  const { where, skip, take, orderBy, select } = options;
+//   const { where, skip, take, orderBy, select } = options;
 
+//   const data = await prisma.student.findMany({
+//     where,
+//     skip,
+//     take,
+//     orderBy,
+//     select,
+//   });
+
+//   const total = await prisma.student.count({ where });
+
+//   return {
+//     data,
+//     meta: {
+//       total,
+//       page: options.page,
+//       limit: options.limit,
+//       totalPage: Math.ceil(total / options.limit),
+//     },
+//   };
+// };
+
+const getAllStudents = async () => {
   const data = await prisma.student.findMany({
-    where,
-    skip,
-    take,
-    orderBy,
-    select,
+    where: {
+      isDeleted: false,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    include: {
+      users: {
+        select: userSafeFields,
+      },
+    },
   });
 
-  const total = await prisma.student.count({ where });
-
-  return {
-    data,
-    meta: {
-      total,
-      page: options.page,
-      limit: options.limit,
-      totalPage: Math.ceil(total / options.limit),
-    },
-  };
+  return data;
 };
 
 const getSingleStudent = async (email: string) => {
   const data = await prisma.student.findUnique({
     where: { email, isDeleted: false },
+    include: {
+      users: {
+        select: userSafeFields,
+      },
+    },
   });
   if (!data) throw new AppError(404, "Student not found");
   return data;
@@ -41,7 +65,7 @@ const getSingleStudent = async (email: string) => {
 const updateStudent = async (
   email: string,
   payload: Partial<Omit<Student, "id" | "createdAt" | "updatedAt">>,
-  file?: any
+  file?: any,
 ) => {
   const existingStudent = await prisma.student.findUnique({ where: { email } });
   if (!existingStudent || existingStudent.isDeleted)
@@ -50,7 +74,7 @@ const updateStudent = async (
   if (file) {
     const { secure_url }: any = await uploadToCloudinary(
       `${email}-${payload.fullName}`,
-      file.buffer
+      file.buffer,
     );
     payload.image = secure_url;
   }

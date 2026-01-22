@@ -1,14 +1,12 @@
 import * as bcrypt from "bcrypt";
-import { prisma } from "../shared/prisma";
-import { UserRole } from "../../../generated/prisma/enums";
+import prisma from "../shared/prisma";
+import { UserRole } from "../../../generated/prisma/client";
 import config from "../config";
 
 const seedSuperAdmin = async () => {
   try {
     const isExistSuperAdmin = await prisma.user.findFirst({
-      where: {
-        role: UserRole.superAdmin,
-      },
+      where: { role: UserRole.superAdmin },
     });
 
     if (isExistSuperAdmin) {
@@ -16,12 +14,9 @@ const seedSuperAdmin = async () => {
       return;
     }
 
-    const hashedPassword = await bcrypt.hash(
-      "123456",
-      Number(config.bcrypt_salt_rounds)
-    );
+    const hashedPassword = await bcrypt.hash("123456", Number(config.bcrypt_salt_rounds));
 
-    const superAdminData = await prisma.user.create({
+    await prisma.user.create({
       data: {
         fullName: "Super Admin",
         email: "masum.stack.dev@gmail.com",
@@ -29,11 +24,13 @@ const seedSuperAdmin = async () => {
         passwordChangedAt: new Date(),
         role: UserRole.superAdmin,
         image: "",
-        status: "approved" as const,
+        status: "approved",
         isDeleted: false,
         lastLogin: new Date(),
       },
     });
+
+    console.log("Super Admin seeded!");
   } catch (err) {
     console.error(err);
   } finally {
