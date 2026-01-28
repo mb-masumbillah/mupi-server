@@ -86,8 +86,6 @@ CREATE TABLE "payments" (
     "image" TEXT,
     "status" TEXT NOT NULL DEFAULT 'pending',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-    "isDeleted" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "payments_pkey" PRIMARY KEY ("id")
 );
@@ -95,7 +93,7 @@ CREATE TABLE "payments" (
 -- CreateTable
 CREATE TABLE "repeats" (
     "id" TEXT NOT NULL,
-    "semester" TEXT,
+    "semester" TEXT NOT NULL,
     "subject" TEXT[],
     "paymentId" TEXT NOT NULL,
 
@@ -164,9 +162,6 @@ CREATE UNIQUE INDEX "instructors_instructorId_key" ON "instructors"("instructorI
 
 -- CreateIndex
 CREATE UNIQUE INDEX "instructors_email_key" ON "instructors"("email");
-
--- CreateIndex
-CREATE UNIQUE INDEX "payments_roll_key" ON "payments"("roll");
 
 -- AddForeignKey
 ALTER TABLE "students" ADD CONSTRAINT "students_user_fkey" FOREIGN KEY ("user") REFERENCES "users"("email") ON DELETE RESTRICT ON UPDATE CASCADE;

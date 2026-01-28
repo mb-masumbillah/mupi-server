@@ -73,27 +73,25 @@ model Instructor {
 // payment
 model Payment {
   id        String   @id @default(uuid())
-  roll      String   @unique
+  roll      String
   amount    String
   txnId     String
   number    String
   semester  String
   image     String?
   status    String   @default("pending")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  isDeleted Boolean  @default(false)
   repeats   Repeat[]
+  createdAt DateTime @default(now())
 
   @@map("payments")
 }
 
 model Repeat {
   id        String   @id @default(uuid())
-  semester  String?
+  semester  String
   subject   String[]
-  payment   Payment  @relation(fields: [paymentId], references: [id])
   paymentId String
+  payment   Payment @relation(fields: [paymentId], references: [id])
 
   @@map("repeats")
 }

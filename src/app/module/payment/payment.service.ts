@@ -4,21 +4,21 @@ import  prisma  from "../../shared/prisma";
 import { uploadToCloudinary } from "../../shared/sendImageToCloudinary";
 import { TPayment } from "./payment.interface";
 
-const createPayment = async (file: any, payload: TPayment) => {
 
 
-  // 1️⃣ File upload
+export const createPayment = async (file: any, payload: any) => {
+  // 1️⃣ upload image
   if (file) {
     const { secure_url }: any = await uploadToCloudinary(
-      `${payload.roll}`,
+      payload.roll,
       file.buffer
     );
     payload.image = secure_url;
   }
 
-  // 2️⃣ Create payment with repeats (Prisma nested create)
+  // 2️⃣ prisma transaction
   const payment = await prisma.$transaction(async (tx) => {
-    const createdPayment = await tx.payment.create({
+    const created = await tx.payment.create({
       data: {
         roll: payload.roll,
         amount: payload.amount,
@@ -26,10 +26,11 @@ const createPayment = async (file: any, payload: TPayment) => {
         number: payload.number,
         semester: payload.semester,
         image: payload.image,
-        status: payload.status || "pending",
-        repeats: payload.repeats
+        status: "pending",
+
+        repeats: payload.repeats?.length
           ? {
-              create: payload.repeats.map((r) => ({
+              create: payload.repeats.map((r: any) => ({
                 semester: r.semester,
                 subject: r.subject,
               })),
@@ -41,11 +42,12 @@ const createPayment = async (file: any, payload: TPayment) => {
       },
     });
 
-    return createdPayment;
+    return created;
   });
 
   return payment;
 };
+
 
 // const getAllPayments = async (query: QueryOptions) => {
 //   const options = Querybuilder(query, ["roll", "txnId", "number", "semester"]);
