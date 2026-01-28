@@ -7,6 +7,7 @@ import { TPayment } from "./payment.interface";
 
 
 export const createPayment = async (file: any, payload: any) => {
+
   // 1️⃣ upload image
   if (file) {
     const { secure_url }: any = await uploadToCloudinary(

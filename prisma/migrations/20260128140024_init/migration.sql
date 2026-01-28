@@ -96,7 +96,7 @@ CREATE TABLE "payments" (
 CREATE TABLE "repeats" (
     "id" TEXT NOT NULL,
     "semester" TEXT NOT NULL,
-    "subject" TEXT NOT NULL,
+    "subject" TEXT[],
     "paymentId" TEXT NOT NULL,
 
     CONSTRAINT "repeats_pkey" PRIMARY KEY ("id")

@@ -93,7 +93,7 @@ model Payment {
 model Repeat {
   id       String @id @default(uuid())
   semester String
-  subject  String
+  subject  String[]
 
   paymentId String
   payment   Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
