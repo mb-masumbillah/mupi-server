@@ -83,9 +83,11 @@ CREATE TABLE "payments" (
     "txnId" TEXT NOT NULL,
     "number" TEXT NOT NULL,
     "semester" TEXT NOT NULL,
+    "status" TEXT NOT NULL,
     "image" TEXT,
-    "status" TEXT NOT NULL DEFAULT 'pending',
+    "isDeleted" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "payments_pkey" PRIMARY KEY ("id")
 );
@@ -94,7 +96,7 @@ CREATE TABLE "payments" (
 CREATE TABLE "repeats" (
     "id" TEXT NOT NULL,
     "semester" TEXT NOT NULL,
-    "subject" TEXT[],
+    "subject" TEXT NOT NULL,
     "paymentId" TEXT NOT NULL,
 
     CONSTRAINT "repeats_pkey" PRIMARY KEY ("id")
@@ -163,6 +165,9 @@ CREATE UNIQUE INDEX "instructors_instructorId_key" ON "instructors"("instructorI
 -- CreateIndex
 CREATE UNIQUE INDEX "instructors_email_key" ON "instructors"("email");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "payments_roll_key" ON "payments"("roll");
+
 -- AddForeignKey
 ALTER TABLE "students" ADD CONSTRAINT "students_user_fkey" FOREIGN KEY ("user") REFERENCES "users"("email") ON DELETE RESTRICT ON UPDATE CASCADE;
 
@@ -170,7 +175,7 @@ ALTER TABLE "students" ADD CONSTRAINT "students_user_fkey" FOREIGN KEY ("user") 
 ALTER TABLE "instructors" ADD CONSTRAINT "instructors_user_fkey" FOREIGN KEY ("user") REFERENCES "users"("email") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "repeats" ADD CONSTRAINT "repeats_paymentId_fkey" FOREIGN KEY ("paymentId") REFERENCES "payments"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "repeats" ADD CONSTRAINT "repeats_paymentId_fkey" FOREIGN KEY ("paymentId") REFERENCES "payments"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "attendance_records" ADD CONSTRAINT "attendance_records_attendanceId_fkey" FOREIGN KEY ("attendanceId") REFERENCES "attendances"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

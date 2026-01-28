@@ -17,7 +17,7 @@ export const createPayment = async (file: any, payload: any) => {
   }
 
   // 2️⃣ prisma transaction
-  const payment = await prisma.$transaction(async (tx) => {
+  const payment = await prisma.$transaction(async (tx:any) => {
     const created = await tx.payment.create({
       data: {
         roll: payload.roll,
@@ -80,62 +80,88 @@ const getAllPayments = async () => {
   return data;
 };
 
+/* ================================
+   GET SINGLE PAYMENT
+================================ */
 
-const getSinglePayment = async (roll: string) => {
-  const data = await prisma.payment.findUnique({
-    where: { roll }, 
-    include: { repeats: true },
+export const getSinglePayment = async (roll: string) => {
+  const payment = await prisma.payment.findFirst({
+    where: {
+      roll,
+      isDeleted: false,
+    },
+    include: {
+      repeats: true,
+    },
   });
 
-  if (!data) { // isDeleted manual check
+  if (!payment) {
     throw new AppError(404, "Payment not found");
   }
 
-  return data;
+  return payment;
 };
 
-const updatePayment = async (roll: string, payload: Partial<TPayment>, file?: any) => {
-  // 1️⃣ File upload (optional)
+/* ================================
+   UPDATE PAYMENT
+================================ */
+
+export const updatePayment = async (
+  roll: string,
+  payload: Partial<TPayment>,
+  file?: Express.Multer.File
+) => {
+  // image upload
   if (file) {
-    const { secure_url }: any = await uploadToCloudinary(`${roll}`, file.buffer);
+    const { secure_url }: any = await uploadToCloudinary(
+      roll,
+      file.buffer
+    );
     payload.image = secure_url;
   }
 
-
-  const updatedPayment = await prisma.$transaction(async (tx) => {
-    const existingPayment = await tx.payment.findUnique({
+  const updatedPayment = await prisma.$transaction(async (tx:any) => {
+    const existingPayment = await tx.payment.findFirst({
       where: { roll },
       include: { repeats: true },
     });
 
-    console.log(existingPayment)
-
-    if (!existingPayment) throw new AppError(404, "Payment not found");
-
-    // যদি payload এ repeats থাকে, old delete + new create
-    if (payload.repeats) {
-      if (existingPayment.repeats.length > 0) {
-        await tx.repeat.deleteMany({ where: { paymentId: existingPayment.id } });
-      }
-      // nested create
-      payload.repeats = payload.repeats.map(r => ({
-        semester: r.semester,
-        subject: r.subject,
-      }));
+    if (!existingPayment) {
+      throw new AppError(404, "Payment not found");
     }
 
-    // update payment (partial)
+    // repeat update
+    if (payload.repeats && payload.repeats.length > 0) {
+      await tx.repeat.deleteMany({
+        where: { paymentId: existingPayment.id },
+      });
+
+      await tx.repeat.createMany({
+        data: payload.repeats.map((item) => ({
+          semester: item.semester,
+          subject: item.subject,
+          paymentId: existingPayment.id,
+        })),
+      });
+    }
+
+    // remove undefined fields
+    const updateData: any = {
+      amount: payload.amount,
+      txnId: payload.txnId,
+      number: payload.number,
+      semester: payload.semester,
+      status: payload.status,
+      image: payload.image,
+    };
+
+    Object.keys(updateData).forEach(
+      (key) => updateData[key] === undefined && delete updateData[key]
+    );
+
     const payment = await tx.payment.update({
       where: { roll },
-      data: {
-        amount: payload.amount,
-        txnId: payload.txnId,
-        number: payload.number,
-        semester: payload.semester,
-        status: payload.status,
-        image: payload.image,
-        repeats: payload.repeats ? { create: payload.repeats } : undefined,
-      },
+      data: updateData,
       include: { repeats: true },
     });
 
@@ -145,31 +171,37 @@ const updatePayment = async (roll: string, payload: Partial<TPayment>, file?: an
   return updatedPayment;
 };
 
-// DELETE Payment
-const deletePayment = async (roll: string) => {
-  const deletedPayment = await prisma.$transaction(async (tx) => {
-    const existingPayment = await tx.payment.findUnique({
+/* ================================
+   DELETE PAYMENT (SOFT DELETE)
+================================ */
+
+export const deletePayment = async (roll: string) => {
+  const deletedPayment = await prisma.$transaction(async (tx:any) => {
+    const payment = await tx.payment.findFirst({
       where: { roll },
       include: { repeats: true },
     });
 
-    if (!existingPayment) throw new AppError(404, "Payment not found");
-
-    // delete repeats
-    if (existingPayment.repeats.length > 0) {
-      await tx.repeat.deleteMany({ where: { paymentId: existingPayment.id } });
+    if (!payment) {
+      throw new AppError(404, "Payment not found");
     }
 
-    // delete payment
-    const payment = await tx.payment.delete({ where: { roll } });
-    return payment;
+    await tx.repeat.deleteMany({
+      where: { paymentId: payment.id },
+    });
+
+    const deleted = await tx.payment.update({
+      where: { roll },
+      data: {
+        isDeleted: true,
+      },
+    });
+
+    return deleted;
   });
 
   return deletedPayment;
 };
-
-
-
 export const paymentService = {
   createPayment,
   getAllPayments,
